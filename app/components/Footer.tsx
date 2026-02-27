@@ -10,7 +10,7 @@ const QUICK_LINKS = [
 ];
 
 const EVENT_INFO = [
-  { icon: "📅", label: "Date", value: "February 1 & 2, 2026" },
+  { icon: "📅", label: "Date", value: "March 1 & 2, 2026" },
   { icon: "⏰", label: "Reporting Time", value: "9:30 AM" },
   { icon: "🎟", label: "Entry", value: "Free" },
   { icon: "⚔", label: "Format", value: "Knockout" },
@@ -306,4 +306,5 @@ export default function Footer() {
       </footer>
     </>
   );
+
 }
