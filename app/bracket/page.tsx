@@ -5,346 +5,349 @@ import { useEffect, useState, useCallback, useRef } from "react";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface Round {
-    _id: string;
-    name: string;
-    status: "upcoming" | "ongoing" | "completed";
-    createdAt: string;
+  _id: string;
+  name: string;
+  status: "upcoming" | "ongoing" | "completed";
+  createdAt: string;
 }
 
 interface PlayerRef {
-    _id: string;
-    fullName: string;
-    class?: string;
-    schoolName?: string;
+  _id: string;
+  fullName: string;
+  class?: string;
+  schoolName?: string;
 }
 
 interface Match {
-    _id: string;
-    matchNumber: number;
-    player1Id: PlayerRef;
-    player2Id: PlayerRef;
-    winnerId: PlayerRef | null;
-    status: "pending" | "completed";
+  _id: string;
+  matchNumber: number;
+  player1Id: PlayerRef;
+  player2Id: PlayerRef;
+  winnerId: PlayerRef | null;
+  status: "pending" | "completed";
 }
 
 interface RoundWithMatches extends Round {
-    matches: Match[];
+  matches: Match[];
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function sortChronological<T extends { createdAt: string }>(items: T[]): T[] {
-    return [...items].sort(
-        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-    );
+  return [...items].sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
 }
 
 function getChampion(rounds: RoundWithMatches[]): PlayerRef | null {
-    if (rounds.length === 0) return null;
-    const sorted = sortChronological(rounds);
-    const finalRound = sorted[sorted.length - 1];
-    if (!finalRound || finalRound.status !== "completed") return null;
-    const matches = finalRound.matches ?? [];
-    if (matches.length !== 1) return null;
-    const finalMatch = matches[0];
-    if (finalMatch.status !== "completed" || !finalMatch.winnerId) return null;
-    return finalMatch.winnerId;
+  if (rounds.length === 0) return null;
+  const sorted = sortChronological(rounds);
+  const finalRound = sorted[sorted.length - 1];
+  if (!finalRound || finalRound.status !== "completed") return null;
+  const matches = finalRound.matches ?? [];
+  if (matches.length !== 1) return null;
+  const finalMatch = matches[0];
+  if (finalMatch.status !== "completed" || !finalMatch.winnerId) return null;
+  return finalMatch.winnerId;
 }
 
 function getInitials(name: string) {
-    return name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
+  return name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
 }
 
 // ─── Champion Banner ──────────────────────────────────────────────────────────
 
 function ChampionBanner({ champion }: { champion: PlayerRef }) {
-    return (
-        <div className="champ-outer">
-            <div className="champ-particles">
-                {[...Array(12)].map((_, i) => (
-                    <div key={i} className="champ-particle" style={{ "--i": i } as React.CSSProperties} />
-                ))}
-            </div>
-            <div className="champ-card">
-                <div className="champ-board-corner tl" />
-                <div className="champ-board-corner tr" />
-                <div className="champ-board-corner bl" />
-                <div className="champ-board-corner br" />
-                <div className="champ-inner">
-                    <div className="champ-crown-ring">
-                        <span className="champ-crown-icon">♛</span>
-                        <div className="champ-crown-rays" />
-                    </div>
-                    <p className="champ-eyebrow">🏆 Chess Champion 2026</p>
-                    <h2 className="champ-name">{champion.fullName}</h2>
-                    {champion.class && (
-                        <p className="champ-sub">
-                            {champion.class}{champion.schoolName ? ` · ${champion.schoolName}` : ""}
-                        </p>
-                    )}
-                    <div className="champ-rule">
-                        <span className="champ-rule-line" />
-                        <span className="champ-rule-diamond">◆</span>
-                        <span className="champ-rule-txt">XL CLASSES · UNDER 19</span>
-                        <span className="champ-rule-diamond">◆</span>
-                        <span className="champ-rule-line" />
-                    </div>
-                </div>
-            </div>
+  return (
+    <div className="champ-outer">
+      <div className="champ-particles">
+        {[...Array(12)].map((_, i) => (
+          <div key={i} className="champ-particle" style={{ "--i": i } as React.CSSProperties} />
+        ))}
+      </div>
+      <div className="champ-card">
+        <div className="champ-board-corner tl" />
+        <div className="champ-board-corner tr" />
+        <div className="champ-board-corner bl" />
+        <div className="champ-board-corner br" />
+        <div className="champ-inner">
+          <div className="champ-crown-ring">
+            <span className="champ-crown-icon">♛</span>
+            <div className="champ-crown-rays" />
+          </div>
+          <p className="champ-eyebrow">🏆 Chess Champion 2026</p>
+          <h2 className="champ-name">{champion.fullName}</h2>
+          {champion.class && (
+            <p className="champ-sub">
+              {champion.class}{champion.schoolName ? ` · ${champion.schoolName}` : ""}
+            </p>
+          )}
+          <div className="champ-rule">
+            <span className="champ-rule-line" />
+            <span className="champ-rule-diamond">◆</span>
+            <span className="champ-rule-txt">XL CLASSES · UNDER 19</span>
+            <span className="champ-rule-diamond">◆</span>
+            <span className="champ-rule-line" />
+          </div>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
 
 // ─── Match Card ───────────────────────────────────────────────────────────────
 
 function MatchCard({ match, delay = 0 }: { match: Match; delay?: number }) {
-    const isCompleted = match.status === "completed";
-    const winnerId = match.winnerId?._id;
+  const isCompleted = match.status === "completed";
+  const winnerId = match.winnerId?._id;
 
-    const renderPlayer = (player: PlayerRef) => {
-        const isWinner = isCompleted && winnerId === player._id;
-        const isLoser = isCompleted && !!winnerId && winnerId !== player._id;
-        return (
-            <div className={`mc-player ${isWinner ? "mc-win" : isLoser ? "mc-lose" : "mc-idle"}`}>
-                <div className={`mc-av ${isWinner ? "mc-av-win" : "mc-av-idle"}`}>
-                    {isWinner ? <span className="mc-av-crown">♛</span> : getInitials(player.fullName)}
-                </div>
-                <div className="mc-info">
-                    <p className={`mc-pname ${isWinner ? "mc-pname-w" : isLoser ? "mc-pname-l" : "mc-pname-n"}`}>
-                        {player.fullName}
-                    </p>
-                    {player.class && (
-                        <p className={`mc-pclass ${isWinner ? "mc-pclass-w" : "mc-pclass-n"}`}>
-                            {player.class}
-                        </p>
-                    )}
-                </div>
-                {isWinner && <span className="mc-chip-win">♛ Winner</span>}
-                {isLoser && <span className="mc-chip-lose">Eliminated</span>}
-            </div>
-        );
-    };
-
+  const renderPlayer = (player: PlayerRef) => {
+    const isWinner = isCompleted && winnerId === player._id;
+    const isLoser = isCompleted && !!winnerId && winnerId !== player._id;
     return (
-        <article
-            className={`mc-card ${isCompleted ? "mc-card-done" : "mc-card-live"}`}
-            style={{ animationDelay: `${delay}ms` }}
-        >
-            <div className="mc-bar">
-                <span className="mc-num">Match #{String(match.matchNumber).padStart(2, "0")}</span>
-                <span className={`mc-badge ${isCompleted ? "mc-badge-done" : "mc-badge-live"}`}>
-                    <span className={`mc-dot ${isCompleted ? "mc-dot-done" : "mc-dot-live"}`} />
-                    {isCompleted ? "Done" : "Pending"}
-                </span>
-            </div>
-            <div className="mc-body">
-                {renderPlayer(match.player1Id)}
-                <div className="mc-vs">
-                    <div className="mc-vs-line" />
-                    <span className="mc-vs-txt">VS</span>
-                    <div className="mc-vs-line" />
-                </div>
-                {renderPlayer(match.player2Id)}
-            </div>
-        </article>
+      <div className={`mc-player ${isWinner ? "mc-win" : isLoser ? "mc-lose" : "mc-idle"}`}>
+        <div className={`mc-av ${isWinner ? "mc-av-win" : "mc-av-idle"}`}>
+          {isWinner ? <span className="mc-av-crown">♛</span> : getInitials(player.fullName)}
+        </div>
+        <div className="mc-info">
+          <p className={`mc-pname ${isWinner ? "mc-pname-w" : isLoser ? "mc-pname-l" : "mc-pname-n"}`}>
+            {player.fullName}
+          </p>
+          {player.class && (
+            <p className={`mc-pclass ${isWinner ? "mc-pclass-w" : "mc-pclass-n"}`}>
+              {player.class}
+            </p>
+          )}
+        </div>
+        {isWinner && <span className="mc-chip-win">♛ Winner</span>}
+        {isLoser && <span className="mc-chip-lose">Eliminated</span>}
+      </div>
     );
+  };
+
+  return (
+    <article
+      className={`mc-card ${isCompleted ? "mc-card-done" : "mc-card-live"}`}
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      <div className="mc-bar">
+        <span className="mc-num">Match #{String(match.matchNumber).padStart(2, "0")}</span>
+        <span className={`mc-badge ${isCompleted ? "mc-badge-done" : "mc-badge-live"}`}>
+          <span className={`mc-dot ${isCompleted ? "mc-dot-done" : "mc-dot-live"}`} />
+          {isCompleted ? "Done" : "Pending"}
+        </span>
+      </div>
+      <div className="mc-body">
+        {renderPlayer(match.player1Id)}
+        <div className="mc-vs">
+          <div className="mc-vs-line" />
+          <span className="mc-vs-txt">VS</span>
+          <div className="mc-vs-line" />
+        </div>
+        {renderPlayer(match.player2Id)}
+      </div>
+    </article>
+  );
 }
 
 // ─── Round Tabs ───────────────────────────────────────────────────────────────
 
 function RoundTabs({
-    rounds, activeId, onSelect,
+  rounds, activeId, onSelect,
 }: {
-    rounds: RoundWithMatches[];
-    activeId: string;
-    onSelect: (id: string) => void;
+  rounds: RoundWithMatches[];
+  activeId: string;
+  onSelect: (id: string) => void;
 }) {
-    const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        if (!scrollRef.current) return;
-        const activeEl = scrollRef.current.querySelector(".tab-active") as HTMLElement;
-        if (activeEl) activeEl.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
-    }, [activeId]);
+  useEffect(() => {
+    if (!scrollRef.current) return;
+    const activeEl = scrollRef.current.querySelector(".tab-active") as HTMLElement;
+    if (activeEl) activeEl.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+  }, [activeId]);
 
-    return (
-        <div className="tabs-wrapper">
-            <div className="tabs-shell" ref={scrollRef}>
-                {rounds.map((r, i) => {
-                    const isActive = r._id === activeId;
-                    const done = (r.matches ?? []).filter((m) => m.status === "completed").length;
-                    const total = r.matches?.length ?? 0;
-                    const isFinal = i === rounds.length - 1;
-                    return (
-                        <button
-                            key={r._id}
-                            onClick={() => onSelect(r._id)}
-                            className={`tab-btn ${isActive ? "tab-active" : "tab-idle"}`}
-                        >
-                            {isFinal && <span className="tab-final-label">FINAL</span>}
-                            <span className="tab-rname">{r.name}</span>
-                            <span className={`tab-score ${isActive ? "tab-score-a" : "tab-score-i"}`}>
-                                {total === 0 ? "—" : `${done} / ${total}`}
-                            </span>
-                            {r.status === "ongoing" && <span className="tab-pulse" />}
-                            {isActive && <span className="tab-underline" />}
-                        </button>
-                    );
-                })}
-            </div>
-        </div>
-    );
+  return (
+    <div className="tabs-wrapper">
+      <div className="tabs-shell" ref={scrollRef}>
+        {rounds.map((r, i) => {
+          const isActive = r._id === activeId;
+          const done = (r.matches ?? []).filter((m) => m.status === "completed").length;
+          const total = r.matches?.length ?? 0;
+          const isFinal = i === rounds.length - 1;
+          return (
+            <button
+              key={r._id}
+              onClick={() => onSelect(r._id)}
+              className={`tab-btn ${isActive ? "tab-active" : "tab-idle"}`}
+            >
+              {isFinal && <span className="tab-final-label">FINAL</span>}
+              <span className="tab-rname">{r.name}</span>
+              <span className={`tab-score ${isActive ? "tab-score-a" : "tab-score-i"}`}>
+                {total === 0 ? "—" : `${done} / ${total}`}
+              </span>
+              {r.status === "ongoing" && <span className="tab-pulse" />}
+              {isActive && <span className="tab-underline" />}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 // ─── Round Panel ─────────────────────────────────────────────────────────────
 
 function RoundPanel({ round }: { round: RoundWithMatches }) {
-    const matches = round.matches ?? [];
-    const done = matches.filter((m) => m.status === "completed").length;
-    const pct = matches.length > 0 ? Math.round((done / matches.length) * 100) : 0;
+  const matches = round.matches ?? [];
+  const done = matches.filter((m) => m.status === "completed").length;
+  const pct = matches.length > 0 ? Math.round((done / matches.length) * 100) : 0;
 
-    const STATUS = {
-        ongoing: { label: "Live", cls: "rpst-live" },
-        completed: { label: "Done", cls: "rpst-done" },
-        upcoming: { label: "Upcoming", cls: "rpst-soon" },
-    };
-    const st = STATUS[round.status];
+  const STATUS = {
+    ongoing: { label: "Live", cls: "rpst-live" },
+    completed: { label: "Done", cls: "rpst-done" },
+    upcoming: { label: "Upcoming", cls: "rpst-soon" },
+  };
+  const st = STATUS[round.status];
 
-    return (
-        <section className="rp-root">
-            <div className="rp-toprow">
-                <div className="rp-left">
-                    <h2 className="rp-title">{round.name}</h2>
-                    <div className="rp-meta-row">
-                        <span className={`rp-status ${st.cls}`}>
-                            <span className={`rp-status-dot rpd-${round.status}`} />
-                            {st.label}
-                        </span>
-                        <span className="rp-chip">{matches.length} Matches</span>
-                        <span className="rp-chip rp-chip-green">{done} Completed</span>
-                        {matches.length - done > 0 && (
-                            <span className="rp-chip rp-chip-gold">{matches.length - done} Pending</span>
-                        )}
-                    </div>
-                </div>
-                <div className="rp-pct-ring">
-                    <svg viewBox="0 0 56 56" className="rp-ring-svg">
-                        <circle cx="28" cy="28" r="24" className="rp-ring-track" />
-                        <circle
-                            cx="28" cy="28" r="24"
-                            className="rp-ring-fill"
-                            strokeDasharray={`${(pct / 100) * 150.8} 150.8`}
-                        />
-                    </svg>
-                    <span className="rp-pct-txt">{pct}%</span>
-                </div>
-            </div>
-
-            {matches.length > 0 && (
-                <div className="rp-prog-wrap">
-                    <div className="rp-prog-track">
-                        <div className="rp-prog-fill" style={{ width: `${pct}%` }} />
-                        <div className="rp-prog-glow" style={{ left: `${pct}%` }} />
-                    </div>
-                </div>
+  return (
+    <section className="rp-root">
+      <div className="rp-toprow">
+        <div className="rp-left">
+          <h2 className="rp-title">{round.name}</h2>
+          <div className="rp-meta-row">
+            <span className={`rp-status ${st.cls}`}>
+              <span className={`rp-status-dot rpd-${round.status}`} />
+              {st.label}
+            </span>
+            <span className="rp-chip">{matches.length} Matches</span>
+            <span className="rp-chip rp-chip-green">{done} Completed</span>
+            {matches.length - done > 0 && (
+              <span className="rp-chip rp-chip-gold">{matches.length - done} Pending</span>
             )}
+          </div>
+        </div>
+        <div className="rp-pct-ring">
+          <svg viewBox="0 0 56 56" className="rp-ring-svg">
+            <circle cx="28" cy="28" r="24" className="rp-ring-track" />
+            <circle
+              cx="28" cy="28" r="24"
+              className="rp-ring-fill"
+              strokeDasharray={`${(pct / 100) * 150.8} 150.8`}
+            />
+          </svg>
+          <span className="rp-pct-txt">{pct}%</span>
+        </div>
+      </div>
 
-            {matches.length === 0 ? (
-                <div className="rp-empty">
-                    <span className="rp-empty-piece">♟</span>
-                    <p className="rp-empty-h">No matches yet</p>
-                    <p className="rp-empty-s">Check back when the admin schedules this round</p>
-                </div>
-            ) : (
-                <div className="mc-grid">
-                    {matches.map((m, i) => (
-                        <MatchCard key={m._id} match={m} delay={i * 45} />
-                    ))}
-                </div>
-            )}
-        </section>
-    );
+      {matches.length > 0 && (
+        <div className="rp-prog-wrap">
+          <div className="rp-prog-track">
+            <div className="rp-prog-fill" style={{ width: `${pct}%` }} />
+            <div className="rp-prog-glow" style={{ left: `${pct}%` }} />
+          </div>
+        </div>
+      )}
+
+      {matches.length === 0 ? (
+        <div className="rp-empty">
+          <span className="rp-empty-piece">♟</span>
+          <p className="rp-empty-h">No matches yet</p>
+          <p className="rp-empty-s">Check back when the admin schedules this round</p>
+        </div>
+      ) : (
+        <div className="mc-grid">
+          {matches.map((m, i) => (
+            <MatchCard key={m._id} match={m} delay={i * 45} />
+          ))}
+        </div>
+      )}
+    </section>
+  );
 }
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function Skeleton() {
-    return (
-        <div className="sk-root">
-            <div className="tabs-wrapper">
-                <div className="tabs-shell">
-                    {[90, 110, 80].map((w, i) => (
-                        <div key={i} className="sk-tab" style={{ width: w, animationDelay: `${i * 0.07}s` }} />
-                    ))}
-                </div>
-            </div>
-            <div className="mc-grid sk-gap" style={{ maxWidth: 1100, margin: "24px auto 0", padding: "0 16px" }}>
-                {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="sk-card" style={{ animationDelay: `${i * 0.06}s` }} />
-                ))}
-            </div>
+  return (
+    <div className="sk-root">
+      <div className="tabs-wrapper">
+        <div className="tabs-shell">
+          {[90, 110, 80].map((w, i) => (
+            <div key={i} className="sk-tab" style={{ width: w, animationDelay: `${i * 0.07}s` }} />
+          ))}
         </div>
-    );
+      </div>
+      <div className="mc-grid sk-gap" style={{ maxWidth: 1100, margin: "24px auto 0", padding: "0 16px" }}>
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="sk-card" style={{ animationDelay: `${i * 0.06}s` }} />
+        ))}
+      </div>
+    </div>
+  );
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function BracketPage() {
-    const [rounds, setRounds] = useState<RoundWithMatches[]>([]);
-    const [activeId, setActiveId] = useState<string>("");
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+  const [rounds, setRounds] = useState<RoundWithMatches[]>([]);
+  const [activeId, setActiveId] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    const fetchBracket = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const res = await fetch("/api/rounds", { cache: "no-store" });
-            const data = await res.json();
-            if (!data.success) { setError("Failed to load bracket."); setRounds([]); return; }
+  const fetchBracket = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/rounds", { cache: "no-store" });
+      const data = await res.json();
+      if (!data.success) { setError("Failed to load bracket."); setRounds([]); return; }
 
-            const sorted = sortChronological(data.rounds ?? []);
-            const matchResults = await Promise.allSettled(
-                sorted.map((r: Round) =>
-                    fetch(`/api/matches?roundId=${r._id}`, { cache: "no-store" }).then((res) => res.json())
-                )
-            );
+      const sorted = sortChronological(data.rounds ?? []);
 
-            const enriched: RoundWithMatches[] = sorted.map((r: Round, i: number) => {
-                const res = matchResults[i];
-                const matches =
-                    res.status === "fulfilled" && res.value?.success
-                        ? (res.value.matches as Match[]).filter(Boolean).sort(
-                            (a: Match, b: Match) => a.matchNumber - b.matchNumber
-                        )
-                        : [];
-                return { ...r, matches };
-            });
+      const matchResults = await Promise.allSettled(
+        sorted.map((r) =>
+          fetch(`/api/matches?roundId=${r._id}`, { cache: "no-store" })
+            .then((res) => res.json())
+        )
+      );
 
-            setRounds(enriched);
-            if (enriched.length > 0) setActiveId(enriched[0]._id);
-        } catch {
-            setError("Network error. Please refresh.");
-            setRounds([]);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+      const enriched: RoundWithMatches[] = sorted.map((r, i) => {
+        const res = matchResults[i];
+        const matches =
+          res.status === "fulfilled" && res.value?.success
+            ? (res.value.matches as Match[])
+              .filter(Boolean)
+              .sort((a, b) => a.matchNumber - b.matchNumber)
+            : [];
 
-    useEffect(() => { fetchBracket(); }, [fetchBracket]);
+        return { ...r, matches };
+      });
 
-    const champion = getChampion(rounds);
-    const activeRound = rounds.find((r) => r._id === activeId) ?? null;
-    const totalMatches = rounds.reduce((s, r) => s + (r.matches?.length ?? 0), 0);
-    const doneMatches = rounds.reduce((s, r) => s + (r.matches ?? []).filter((m) => m.status === "completed").length, 0);
-    const overallPct = totalMatches > 0 ? Math.round((doneMatches / totalMatches) * 100) : 0;
+      setRounds(enriched);
+      if (enriched.length > 0) setActiveId(enriched[0]._id);
+    } catch {
+      setError("Network error. Please refresh.");
+      setRounds([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-    const finalRound = rounds.length > 0 ? sortChronological(rounds)[rounds.length - 1] : null;
-    const showFinalOngoing = !loading && !champion && finalRound?.status === "ongoing";
+  useEffect(() => { fetchBracket(); }, [fetchBracket]);
 
-    return (
-        <>
-            <style>{`
+  const champion = getChampion(rounds);
+  const activeRound = rounds.find((r) => r._id === activeId) ?? null;
+  const totalMatches = rounds.reduce((s, r) => s + (r.matches?.length ?? 0), 0);
+  const doneMatches = rounds.reduce((s, r) => s + (r.matches ?? []).filter((m) => m.status === "completed").length, 0);
+  const overallPct = totalMatches > 0 ? Math.round((doneMatches / totalMatches) * 100) : 0;
+
+  const finalRound = rounds.length > 0 ? sortChronological(rounds)[rounds.length - 1] : null;
+  const showFinalOngoing = !loading && !champion && finalRound?.status === "ongoing";
+
+  return (
+    <>
+      <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Outfit:wght@300;400;500;600;700&display=swap');
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1024,103 +1027,103 @@ export default function BracketPage() {
         }
       `}</style>
 
-            <div className="bkt-page">
-                {/* Background texture — scoped, won't affect navbar/footer */}
-                <div className="bkt-bg" aria-hidden="true" />
+      <div className="bkt-page">
+        {/* Background texture — scoped, won't affect navbar/footer */}
+        <div className="bkt-bg" aria-hidden="true" />
 
-                <div className="bkt-content bkt-enter">
+        <div className="bkt-content bkt-enter">
 
-                    {/* ── Hero ─────────────────────────────────────────────── */}
-                    <header className="bkt-hero">
-                        <div className="bkt-hero-piece bkt-hero-piece-l">♜</div>
-                        <div className="bkt-hero-piece bkt-hero-piece-r">♞</div>
-                        <p className="bkt-eyebrow">
-                            <span className="bkt-eyebrow-dot" />
-                            XL Classes · Checkmate Championship
-                            <span className="bkt-eyebrow-dot" />
-                        </p>
-                        <h1 className="bkt-title">
-                            Tournament <span className="bkt-title-gold">Bracket</span>
-                        </h1>
-                        <p className="bkt-subtitle">Live match standings &amp; results · 2026</p>
-                        <div className="bkt-rule">
-                            <span className="bkt-rule-line" />
-                            <span className="bkt-rule-piece">♟</span>
-                            <span className="bkt-rule-line flip" />
-                        </div>
-                    </header>
-
-                    {/* ── Error ──────────────────────────────────────────────── */}
-                    {error && (
-                        <div className="err-box">
-                            {error}
-                            <button className="err-retry" onClick={fetchBracket}>Retry</button>
-                        </div>
-                    )}
-
-                    {/* ── Champion ──────────────────────────────────────────── */}
-                    {!loading && champion && <ChampionBanner champion={champion} />}
-
-                    {/* ── Final Ongoing Badge ───────────────────────────────── */}
-                    {showFinalOngoing && finalRound && (
-                        <div className="final-ongoing">
-                            <div className="final-ongoing-crown">♛</div>
-                            <div className="final-ongoing-text">
-                                <h3>Grand Final · In Progress</h3>
-                                <p>{finalRound.name} is underway — champion will be declared soon</p>
-                            </div>
-                            <div className="final-ongoing-pulse">
-                                <div className="final-ongoing-dot" />
-                                Live
-                            </div>
-                        </div>
-                    )}
-
-                    {/* ── Stats bar ─────────────────────────────────────────── */}
-                    {!loading && rounds.length > 0 && totalMatches > 0 && (
-                        <div className="stats-bar">
-                            <span className="stat-chip"><b>{rounds.length}</b><span>Rounds</span></span>
-                            <span className="stat-chip"><b>{totalMatches}</b><span>Matches</span></span>
-                            <span className="stat-chip"><b>{doneMatches}</b><span>Completed</span></span>
-                            <div className="prog-wrap">
-                                <div className="prog-track">
-                                    <div className="prog-fill" style={{ width: `${overallPct}%` }} />
-                                </div>
-                                <span className="prog-pct">{overallPct}%</span>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* ── Loading skeleton ──────────────────────────────────── */}
-                    {loading && <Skeleton />}
-
-                    {/* ── No rounds ─────────────────────────────────────────── */}
-                    {!loading && rounds.length === 0 && !error && (
-                        <div className="no-rounds">
-                            <div className="no-rounds-board">
-                                {[...Array(16)].map((_, i) => (
-                                    <div
-                                        key={i}
-                                        className={`no-rounds-sq ${(Math.floor(i / 4) + i) % 2 === 0 ? "dark" : "light"}`}
-                                    />
-                                ))}
-                            </div>
-                            <p className="no-rounds-h">Bracket Coming Soon</p>
-                            <p className="no-rounds-s">Rounds will appear once the tournament begins</p>
-                        </div>
-                    )}
-
-                    {/* ── Round tabs + panel ────────────────────────────────── */}
-                    {!loading && rounds.length > 0 && (
-                        <>
-                            <RoundTabs rounds={rounds} activeId={activeId} onSelect={setActiveId} />
-                            <div className="tabs-separator" />
-                            {activeRound && <RoundPanel key={activeRound._id} round={activeRound} />}
-                        </>
-                    )}
-
-                </div>
+          {/* ── Hero ─────────────────────────────────────────────── */}
+          <header className="bkt-hero">
+            <div className="bkt-hero-piece bkt-hero-piece-l">♜</div>
+            <div className="bkt-hero-piece bkt-hero-piece-r">♞</div>
+            <p className="bkt-eyebrow">
+              <span className="bkt-eyebrow-dot" />
+              XL Classes · Checkmate Championship
+              <span className="bkt-eyebrow-dot" />
+            </p>
+            <h1 className="bkt-title">
+              Tournament <span className="bkt-title-gold">Bracket</span>
+            </h1>
+            <p className="bkt-subtitle">Live match standings &amp; results · 2026</p>
+            <div className="bkt-rule">
+              <span className="bkt-rule-line" />
+              <span className="bkt-rule-piece">♟</span>
+              <span className="bkt-rule-line flip" />
             </div>
-        </>
-    );
+          </header>
+
+          {/* ── Error ──────────────────────────────────────────────── */}
+          {error && (
+            <div className="err-box">
+              {error}
+              <button className="err-retry" onClick={fetchBracket}>Retry</button>
+            </div>
+          )}
+
+          {/* ── Champion ──────────────────────────────────────────── */}
+          {!loading && champion && <ChampionBanner champion={champion} />}
+
+          {/* ── Final Ongoing Badge ───────────────────────────────── */}
+          {showFinalOngoing && finalRound && (
+            <div className="final-ongoing">
+              <div className="final-ongoing-crown">♛</div>
+              <div className="final-ongoing-text">
+                <h3>Grand Final · In Progress</h3>
+                <p>{finalRound.name} is underway — champion will be declared soon</p>
+              </div>
+              <div className="final-ongoing-pulse">
+                <div className="final-ongoing-dot" />
+                Live
+              </div>
+            </div>
+          )}
+
+          {/* ── Stats bar ─────────────────────────────────────────── */}
+          {!loading && rounds.length > 0 && totalMatches > 0 && (
+            <div className="stats-bar">
+              <span className="stat-chip"><b>{rounds.length}</b><span>Rounds</span></span>
+              <span className="stat-chip"><b>{totalMatches}</b><span>Matches</span></span>
+              <span className="stat-chip"><b>{doneMatches}</b><span>Completed</span></span>
+              <div className="prog-wrap">
+                <div className="prog-track">
+                  <div className="prog-fill" style={{ width: `${overallPct}%` }} />
+                </div>
+                <span className="prog-pct">{overallPct}%</span>
+              </div>
+            </div>
+          )}
+
+          {/* ── Loading skeleton ──────────────────────────────────── */}
+          {loading && <Skeleton />}
+
+          {/* ── No rounds ─────────────────────────────────────────── */}
+          {!loading && rounds.length === 0 && !error && (
+            <div className="no-rounds">
+              <div className="no-rounds-board">
+                {[...Array(16)].map((_, i) => (
+                  <div
+                    key={i}
+                    className={`no-rounds-sq ${(Math.floor(i / 4) + i) % 2 === 0 ? "dark" : "light"}`}
+                  />
+                ))}
+              </div>
+              <p className="no-rounds-h">Bracket Coming Soon</p>
+              <p className="no-rounds-s">Rounds will appear once the tournament begins</p>
+            </div>
+          )}
+
+          {/* ── Round tabs + panel ────────────────────────────────── */}
+          {!loading && rounds.length > 0 && (
+            <>
+              <RoundTabs rounds={rounds} activeId={activeId} onSelect={setActiveId} />
+              <div className="tabs-separator" />
+              {activeRound && <RoundPanel key={activeRound._id} round={activeRound} />}
+            </>
+          )}
+
+        </div>
+      </div>
+    </>
+  );
 }
