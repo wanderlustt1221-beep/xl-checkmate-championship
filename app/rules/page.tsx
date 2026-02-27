@@ -355,22 +355,24 @@ export default function RulesPage() {
                             </div>
 
                             {/* Emphasis line */}
-                            <div className="flex items-center gap-3">
-                                <div
-                                    className="h-px flex-1"
-                                    style={{ background: "linear-gradient(90deg, rgba(250,204,21,0.3), transparent)" }}
-                                />
-                                <p
-                                    className="text-yellow-400/50 text-xs tracking-widest uppercase shrink-0"
-                                    style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic" }}
-                                >
-                                    "In chess and in life — integrity is the grandmaster"
-                                </p>
-                                <div
-                                    className="h-px flex-1"
-                                    style={{ background: "linear-gradient(90deg, transparent, rgba(250,204,21,0.3))" }}
-                                />
-                            </div>
+                            <div className="flex items-center gap-3 flex-wrap">
+  <div
+    className="h-px flex-1"
+    style={{ background: "linear-gradient(90deg, rgba(250,204,21,0.3), transparent)" }}
+  />
+  
+  <p
+    className="text-yellow-400/50 text-xs tracking-widest uppercase text-center px-2"
+    style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic" }}
+  >
+    In chess and in life — integrity is the grandmaster
+  </p>
+
+  <div
+    className="h-px flex-1"
+    style={{ background: "linear-gradient(90deg, transparent, rgba(250,204,21,0.3))" }}
+  />
+</div>
                         </div>
                     </Reveal>
                 </section>
@@ -409,4 +411,5 @@ export default function RulesPage() {
             </div>
         </>
     );
+
 }
