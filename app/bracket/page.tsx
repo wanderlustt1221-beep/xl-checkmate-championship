@@ -303,7 +303,9 @@ export default function BracketPage() {
       const data = await res.json();
       if (!data.success) { setError("Failed to load bracket."); setRounds([]); return; }
 
-      const sorted = sortChronological(data.rounds ?? []);
+      const sorted = sortChronological<Round>(
+        (data.rounds ?? []) as Round[]
+      );
 
       const matchResults = await Promise.allSettled(
         sorted.map((r) =>
