@@ -1045,7 +1045,7 @@ export default function BracketPage() {
               <span className="bkt-eyebrow-dot" />
             </p>
             <h1 className="bkt-title">
-              Tournament <span className="bkt-title-gold">Bracket</span>
+              Tournament <span className="bkt-title-gold">Matches</span>
             </h1>
             <p className="bkt-subtitle">Live match standings &amp; results · 2026</p>
             <div className="bkt-rule">
@@ -1110,7 +1110,7 @@ export default function BracketPage() {
                   />
                 ))}
               </div>
-              <p className="no-rounds-h">Bracket Coming Soon</p>
+              <p className="no-rounds-h">Matches Coming Soon</p>
               <p className="no-rounds-s">Rounds will appear once the tournament begins</p>
             </div>
           )}
@@ -1129,3 +1129,4 @@ export default function BracketPage() {
     </>
   );
 }
+
