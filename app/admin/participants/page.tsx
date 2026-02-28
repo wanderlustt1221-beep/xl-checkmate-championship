@@ -537,47 +537,62 @@ export default function AdminParticipantsPage() {
             }}>
 
                 {/* ─── Header ─── */}
-                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
-                    <div>
-                        <p style={{
-                            fontFamily: "'DM Sans', sans-serif",
-                            fontSize: "0.62rem", fontWeight: 700,
-                            letterSpacing: "0.24em", textTransform: "uppercase",
-                            color: "rgba(250,204,21,0.5)", marginBottom: 5,
-                        }}>
+                <div
+                    className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 sm:gap-4"
+                >
+                    {/* Left Content */}
+                    <div className="max-w-full sm:max-w-[70%]">
+                        <p
+                            className="uppercase tracking-[0.24em] font-bold text-[0.62rem] text-yellow-400/50 mb-1"
+                            style={{ fontFamily: "'DM Sans', sans-serif" }}
+                        >
                             Management
                         </p>
-                        <h1 style={{
-                            fontFamily: "'Cinzel', serif",
-                            fontSize: "clamp(1.5rem, 5vw, 2.1rem)",
-                            fontWeight: 900, color: "#fff", lineHeight: 1.1, margin: 0,
-                        }}>
+
+                        <h1
+                            className="text-white font-black leading-tight text-[clamp(1.5rem,6vw,2.1rem)] break-words"
+                            style={{ fontFamily: "'Cinzel', serif" }}
+                        >
                             Participants
                         </h1>
-                        <p style={{
-                            fontFamily: "'DM Sans', sans-serif",
-                            fontSize: "0.75rem", color: "rgba(255,255,255,0.22)",
-                            marginTop: 5,
-                        }}>
+
+                        <p
+                            className="text-white/30 text-xs mt-2"
+                            style={{ fontFamily: "'DM Sans', sans-serif" }}
+                        >
                             All registered players for the championship
                         </p>
                     </div>
-                    <button
-                        onClick={fetchPlayers}
-                        style={{
-                            display: "flex", alignItems: "center", gap: 6, flexShrink: 0,
-                            fontFamily: "'DM Sans', sans-serif",
-                            fontSize: "0.73rem", fontWeight: 500,
-                            color: "rgba(255,255,255,0.3)",
-                            background: "rgba(255,255,255,0.03)",
-                            border: "1px solid rgba(255,255,255,0.07)",
-                            borderRadius: 10, padding: "7px 13px",
-                            cursor: "pointer", whiteSpace: "nowrap",
-                            marginTop: 4,
-                        }}
-                    >
-                        ↻ Refresh
-                    </button>
+
+                    {/* Right Buttons */}
+                    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        <button
+                            onClick={fetchPlayers}
+                            className="w-full sm:w-auto px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white/50 hover:text-white transition text-sm"
+                        >
+                            ↻ Refresh
+                        </button>
+
+                        <button
+                            onClick={async () => {
+                                try {
+                                    const res = await fetch("/api/players/whatsapp");
+                                    const data = await res.json();
+
+                                    if (data.success) {
+                                        window.open(data.url, "_blank");
+                                    } else {
+                                        setToast({ msg: "Failed to send list", type: "error" });
+                                    }
+                                } catch {
+                                    setToast({ msg: "Network error", type: "error" });
+                                }
+                            }}
+                            className="w-full sm:w-auto px-4 py-2 rounded-lg bg-yellow-400 text-black font-semibold hover:bg-yellow-300 transition text-sm shadow-lg shadow-yellow-400/20"
+                        >
+                            📲 Send to Whatsapp →
+                        </button>
+                    </div>
                 </div>
 
                 {/* ─── Error ─── */}
