@@ -179,7 +179,7 @@ export default function HomePage() {
   }, []);
 
   const EVENT_DETAILS = [
-    { icon: "📅", label: "Date", value: "March 1 & 2" },
+    { icon: "📅", label: "Date", value: "February 1 & 2" },
     { icon: "⏰", label: "Reporting Time", value: "9:30 AM" },
     { icon: "🎟", label: "Entry", value: "Free" },
     { icon: "⚔", label: "Format", value: "Knockout" },
@@ -206,7 +206,7 @@ export default function HomePage() {
 
   const TIMELINE = [
     { phase: "Registration Phase", desc: "Open registration for all eligible students", active: true },
-    { phase: "Round 1-N", desc: "First knockout matches commence", active: false },
+    { phase: "Round 1", desc: "First knockout matches commence", active: false },
     { phase: "Quarterfinal", desc: "Top 8 players battle for the semis", active: false },
     { phase: "Semifinal", desc: "Final four compete for championship berths", active: false },
     { phase: "Grand Final", desc: "The champion is crowned", active: false },
@@ -354,6 +354,25 @@ export default function HomePage() {
       `}</style>
 
       <main className="page-bg">
+
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/*  6 · TRUST / BRAND                                     */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        <section className="max-w-3xl mx-auto px-4 py-8 pb-20">
+          <Section>
+            <div className="trust-card rounded-2xl p-8 text-center flex flex-col items-center gap-5">
+              
+              <a
+                href="www.youtube.com/@XL_Classes7"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-red-600 px-7 py-3 rounded-xl text-sm font-bold tracking-wide"
+              >
+                Watch Live Matches on Youtube ↗
+              </a>
+            </div>
+          </Section>
+        </section>
 
         {/* ═══════════════════════════════════════════════════════ */}
         {/*  1 · HERO                                              */}
@@ -529,7 +548,7 @@ export default function HomePage() {
                   About XL Classes
                 </h3>
                 <p className="text-white/40 text-sm leading-relaxed max-w-lg mx-auto">
-                  XL Classes is dedicated to nurturing young talent through competitive academics and co-curricular excellence. The Under 19 XL Checkmate Championship is our commitment to building the next generation of thinkers and leaders — one move at a time.
+                  XL Classes is dedicated to nurturing young talent through competitive academics and co-curricular excellence. The Under 19 Chess Championship is our commitment to building the next generation of thinkers and leaders — one move at a time.
                 </p>
               </div>
               <a
