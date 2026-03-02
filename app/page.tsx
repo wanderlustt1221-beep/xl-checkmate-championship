@@ -363,7 +363,7 @@ export default function HomePage() {
             <div className="trust-card rounded-2xl p-8 text-center flex flex-col items-center gap-5">
               
               <a
-                href="https://www.youtube.com/live/th7773ghuSo"
+                href="https://www.youtube.com/live/zUF1F5yhZsI"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-red-600 px-7 py-3 rounded-xl text-sm font-bold tracking-wide"
