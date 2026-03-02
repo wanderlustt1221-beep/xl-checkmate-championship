@@ -356,14 +356,14 @@ export default function HomePage() {
       <main className="page-bg">
 
         {/* ═══════════════════════════════════════════════════════ */}
-        {/*  6 · TRUST / BRAND                                     */}
+        {/*  1 · Live Youtube                                    */}
         {/* ═══════════════════════════════════════════════════════ */}
         <section className="max-w-3xl mx-auto px-4 py-8 pb-20">
           <Section>
             <div className="trust-card rounded-2xl p-8 text-center flex flex-col items-center gap-5">
               
               <a
-                href="www.youtube.com/@XL_Classes7"
+                href="https://www.youtube.com/@XL_Classes7"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-red-600 px-7 py-3 rounded-xl text-sm font-bold tracking-wide"
